@@ -1,0 +1,201 @@
+---
+title: "R for Data Science Notes"
+subtitle: "STAT 359"
+author: "Arturo Fonseca"
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    link-external-newwindow: true
+    
+execute:
+  warning: false
+
+from: markdown+emoji
+---
+
+## Introduction
+
+Import -\> tidy -\> transform -\> visualization -\> models -\> communication
+
+## 1: Data Visualization
+
+**Grammar of graphics**: a coherent system for describing and building graphs
+
+"Tabular data is ***tidy*** if each value is placed in its own “cell”, each variable in its own column, and each observation in its own row"
+
+**Tibble**: a data frame
+
+"When aesthetic mappings are defined in `ggplot()`, at the *global* level, they’re passed down to each of the subsequent geom layers of the plot. However, each geom function in ggplot2 can also take a `mapping` argument, which allows for aesthetic mappings at the *local* level that are added to those inherited from the global level"
+
+Final plot:
+
+``` r
+ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point(aes(color = species, shape = species)) +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Body mass and flipper length",
+    subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
+    x = "Flipper length (mm)", y = "Body mass (g)",
+    color = "Species", shape = "Species"
+  ) +
+  scale_color_colorblind()
+```
+
+A variable is:
+
+-   `categorical` if it can only take one of a small set of values
+
+    -   Use bar chart
+
+-   `numerical` if it can take a wide range of numerical values (continuous or discrete)
+
+    -   Use histogram: `binwidth = x` or density plot
+
+Relationships:
+
+-   Numerical and categorical: boxplot or density plot
+
+-   Categorical and numerical: stacked bar plot, relative frequency plot
+
+-   Numerical and numerical: scatterplot, use `facet_wrap` for more complex plots
+
+`ggsave(filename = "<name>")` will save the most recent plot created to your working directory
+
+## 3: Data Transformation
+
+-   `filter` (we know what it does already)
+-   `arrange`: each subsequent column name is used to break ties, `desc` to reverse the order
+-   `distinct`: removes duplicate rows and only keeps unique (combinations if columns supplied, `.keep_all` to not remove unspecified columns)
+    -   `count` to count the number of occurrences of the combinations specified by the column names, `sort = TRUE` to arrange counts in descending order?
+
+------------------------------------------------------------------------
+
+-   `mutate`: add a new column, `.before = 1` argument to add columns to the left-hand side instead, `.keep = "used"` to only keep columns that were used in the calculations
+-   `select`: keep only columns you're interested in (`select(year, month)`, `select(year:month)`, `select(!year:month)`, `select(where(<condition>))`, rename using `=`)
+-   `rename`: renames column names
+-   `relocate`: moves variables to the front by default, can be specified using `.before` and `.after` arguments like in `mutate`
+
+------------------------------------------------------------------------
+
+**The pipe**
+
+-   Allows data to be passed into the first argument of the next function
+
+------------------------------------------------------------------------
+
+**Groups**
+
+-   `group_by`: by itself doesn't do anything but adds groups on top of the data
+
+-   `summarize`: reduces data into a single row for each group
+
+-   `slice_...`: functions take the `n` results from a data frame, set `with_ties = FALSE` to get only 1 result per tie
+
+-   `ungroup`: removes groups from a data frame
+
+-   `.by`: can also use this argument as a substitute for `group_by`/`ungroup` (`.by = c(origin, dest)`)
+
+## 4: Workflow: Code Style
+
+-   Consistent style
+
+-   Strive for smaller pipes
+
+## 7: Data Import
+
+-   Most common rectangular data file type: `csv`
+
+-   `read_csv` takes a path, and an `na` argument to specify what counts as `NA` in the file, `skip = <num>` to skip metadata lines, `comment = <chr>` for comments, `col_names = <bool>/<vector of intended names>` to specify whether the csv has a header
+
+    -   `col_types` takes a list of types for each of its columns, or `cols(.default = <type>)`, or `cols_only(x = <type>)`
+
+-   Use `janitor::clean_names()` to clean up names all in one sweep
+
+-   Use `if_else` to make a variable based on a condition
+
+-   Load in multiple files by using `list.files`, with arguments `pattern = <chr>`, `full_names = <bool>`
+
+------------------------------------------------------------------------
+
+**Writing to a file**
+
+-   `write_c(/t)sv`: takes in the data frame and a path, **NOTE**: data is lost when writing then reading since it's plain text
+    -   Instead use R's custom binary format called `RDS` (`write/read_rds(<data>, <path>)`)
+
+------------------------------------------------------------------------
+
+**Data entry**
+
+-   `tibble`: allows you to enter data column-wise
+
+-   `tribble`: does the opposite (using **t**ransposed ti**bble**)
+
+### Class notes
+
+`read.csv` vs `read_csv`: tidyverse functions always have underscores, we will be using tidyverse functions `data.frame` vs `tibble`
+
+```{r}
+library(tidyverse)
+# base R
+df <- data.frame(abc = 1, xyz = "a")
+
+# tidyverse
+tibble <- tibble(abc = 1, xyz = "a")
+
+is_tibble(df)
+is_tibble(tibble)
+
+df$x
+tibble$x
+
+df[, "xyz"] # returns a vector
+tibble[, "xyz"] # returns a tibble
+
+df[, c("abc", "xyz")] # returns a data frame
+tibble[, c("abc", "xyz")] # returns a tibble
+```
+
+```{r}
+# write.csv(df, "data/df.csv") # adds unnecessary index
+# write_csv(tibble, "data/tibble.csv") # writes data as is
+```
+
+```{r}
+# df1 <- read.csv("data/df.csv")
+# tibble1 <- read_csv("data/tibble.csv")
+
+# is_tibble(df1) # FALSE
+# is_tibble(tibble1) # TRUE
+
+# df1 # results in the scroll of death
+
+# tibble1 # prints only first 10 rows
+```
+
+## 5: Data Tidying
+
+Tidy attributes:
+
+1.  Each variable is a column
+2.  Each observation is a row
+3.  Each value is a cell
+
+`tidyr` provides two functions: `pivot_longer` and `pivot_wider`
+
+-   `pivot_longer`: three 3 arguments: `cols`, `names_to`, and `values_to`, also `values_drop_na` removes unnecessary observations
+
+    -   Use `names_sep` for a delimiter to separate column column names (`sp_m_014` -\> `sp`, `m`, `014`)
+
+    -   Use the special `".value"` in `names_to` to tell `pivot_longer` to override the `values_to` argument
+
+-   `pivot_wider`: `id_cols`, `names_from`, `values_from`
+
+## 19: Joins
+
+Two important types of joins: mutating joins and filtering joins
