@@ -199,3 +199,41 @@ Tidy attributes:
 ## 19: Joins
 
 Two important types of joins: mutating joins and filtering joins
+
+**Keys**
+
+-   **Primary key** uniquely identifies each observation (**compound key** when more than one variable is needed)
+
+-   **Foreign key** corresponds to a primary key in another table
+
+-   **Surrogate key** makes a primary key for a table
+
+**Joins**
+
+-   **Mutating join** allows you to combine variables from two data frames
+
+    -   `left_join`'s output will always have the same rows as `x`, will use a **natural** join (columns appearing in both data frames), but doesn't always work
+
+        -   Use `join_by` to specify column names to join by
+
+-   **Filtering joins** filters the rows: **semi-joins** and **anti-joins**
+
+    -   **Semi-joins** keep all rows in `x` that have a match in `y`
+
+    -   **Anti-joins** are the opposite, they return all rows in `x` that don't have a match in `y`
+
+**Non-equi joins**
+
+-   **Cross joins**: match every pair of rows
+
+    -   Cartesian product
+
+-   **Inequality joins**: use boolean operators
+
+-   **Rolling joins**: similar to inequality joins but find the closest math
+
+    -   Add `closest(<condition>)` to make into a rolling join
+
+-   **Overlap joins**: special type of inequality join designed to work with ranges
+
+    -   Three helpers: `between`, `within`, and `overlaps`
