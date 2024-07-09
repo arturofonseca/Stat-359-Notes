@@ -3084,6 +3084,13 @@ vertical-align: -.125em;
   <ul class="collapse">
   <li><a href="#class-notes" id="toc-class-notes" class="nav-link" data-scroll-target="#class-notes">Class notes</a></li>
   </ul></li>
+  <li><a href="#data-tidying" id="toc-data-tidying" class="nav-link" data-scroll-target="#data-tidying">5: Data Tidying</a></li>
+  <li><a href="#joins" id="toc-joins" class="nav-link" data-scroll-target="#joins">19: Joins</a>
+  <ul class="collapse">
+  <li><a href="#class-notes-1" id="toc-class-notes-1" class="nav-link" data-scroll-target="#class-notes-1">Class notes</a></li>
+  </ul></li>
+  <li><a href="#factors" id="toc-factors" class="nav-link" data-scroll-target="#factors">16: Factors</a></li>
+  <li><a href="#dates-and-times" id="toc-dates-and-times" class="nav-link" data-scroll-target="#dates-and-times">17: Dates and Times</a></li>
   </ul>
 </nav>
 </div>
@@ -3197,8 +3204,8 @@ vertical-align: -.125em;
 <li><p>Strive for smaller pipes</p></li>
 </ul>
 </section>
-<section id="data-import" class="level1">
-<h1>7: Data Import</h1>
+<section id="data-import" class="level2">
+<h2 class="anchored" data-anchor-id="data-import">7: Data Import</h2>
 <ul>
 <li><p>Most common rectangular data file type: <code>csv</code></p></li>
 <li><p><code>read_csv</code> takes a path, and an <code>na</code> argument to specify what counts as <code>NA</code> in the file, <code>skip = &lt;num&gt;</code> to skip metadata lines, <code>comment = &lt;chr&gt;</code> for comments, <code>col_names = &lt;bool&gt;/&lt;vector of intended names&gt;</code> to specify whether the csv has a header</p>
@@ -3290,6 +3297,110 @@ vertical-align: -.125em;
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># tibble1 # prints only first 10 rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
+</section>
+<section id="data-tidying" class="level2">
+<h2 class="anchored" data-anchor-id="data-tidying">5: Data Tidying</h2>
+<p>Tidy attributes:</p>
+<ol type="1">
+<li>Each variable is a column</li>
+<li>Each observation is a row</li>
+<li>Each value is a cell</li>
+</ol>
+<p><code>tidyr</code> provides two functions: <code>pivot_longer</code> and <code>pivot_wider</code></p>
+<ul>
+<li><p><code>pivot_longer</code>: three 3 arguments: <code>cols</code>, <code>names_to</code>, and <code>values_to</code>, also <code>values_drop_na</code> removes unnecessary observations</p>
+<ul>
+<li><p>Use <code>names_sep</code> for a delimiter to separate column column names (<code>sp_m_014</code> -&gt; <code>sp</code>, <code>m</code>, <code>014</code>)</p></li>
+<li><p>Use the special <code>&quot;.value&quot;</code> in <code>names_to</code> to tell <code>pivot_longer</code> to override the <code>values_to</code> argument</p></li>
+</ul></li>
+<li><p><code>pivot_wider</code>: <code>id_cols</code>, <code>names_from</code>, <code>values_from</code></p></li>
+</ul>
+</section>
+<section id="joins" class="level2">
+<h2 class="anchored" data-anchor-id="joins">19: Joins</h2>
+<p>Two important types of joins: mutating joins and filtering joins</p>
+<p><strong>Keys</strong></p>
+<ul>
+<li><p><strong>Primary key</strong> uniquely identifies each observation (<strong>compound key</strong> when more than one variable is needed)</p></li>
+<li><p><strong>Foreign key</strong> corresponds to a primary key in another table</p></li>
+<li><p><strong>Surrogate key</strong> makes a primary key for a table</p></li>
+</ul>
+<p><strong>Joins</strong></p>
+<ul>
+<li><p><strong>Mutating join</strong> allows you to combine variables from two data frames</p>
+<ul>
+<li><p><code>left_join</code>’s output will always have the same rows as <code>x</code>, will use a <strong>natural</strong> join (columns appearing in both data frames), but doesn’t always work</p>
+<ul>
+<li>Use <code>join_by</code> to specify column names to join by</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Filtering joins</strong> filters the rows: <strong>semi-joins</strong> and <strong>anti-joins</strong></p>
+<ul>
+<li><p><strong>Semi-joins</strong> keep all rows in <code>x</code> that have a match in <code>y</code></p></li>
+<li><p><strong>Anti-joins</strong> are the opposite, they return all rows in <code>x</code> that don’t have a match in <code>y</code></p></li>
+</ul></li>
+</ul>
+<p><strong>Non-equi joins</strong></p>
+<ul>
+<li><p><strong>Cross joins</strong>: match every pair of rows</p>
+<ul>
+<li>Cartesian product</li>
+</ul></li>
+<li><p><strong>Inequality joins</strong>: use boolean operators</p></li>
+<li><p><strong>Rolling joins</strong>: similar to inequality joins but find the closest math</p>
+<ul>
+<li>Add <code>closest(&lt;condition&gt;)</code> to make into a rolling join</li>
+</ul></li>
+<li><p><strong>Overlap joins</strong>: special type of inequality join designed to work with ranges</p>
+<ul>
+<li>Three helpers: <code>between</code>, <code>within</code>, and <code>overlaps</code></li>
+</ul></li>
+</ul>
+<section id="class-notes-1" class="level3">
+<h3 class="anchored" data-anchor-id="class-notes-1">Class notes</h3>
+<p>Using the <code>Lahman</code> package</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Lahman)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>pitcher_salary <span class="ot">&lt;-</span> Pitching <span class="sc">|&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(Salaries)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><code>fill</code> to fill data</p>
+</section>
+</section>
+<section id="factors" class="level2">
+<h2 class="anchored" data-anchor-id="factors">16: Factors</h2>
+<ul>
+<li>Used for categorical variables</li>
+<li>First, create a list of valid <strong>levels</strong> (order matters)
+<ul>
+<li>Values not present in <code>levels</code> will be <code>NA</code></li>
+<li>Access to levels directly using <code>levels()</code></li>
+<li>Use <code>col_factors()</code> to convert data when reading in</li>
+</ul></li>
+<li>To view levels of a factor variable, use <code>count(&lt;var&gt;)</code></li>
+<li>Use <code>factor_reorder()</code> to reorganize your factors:
+<ul>
+<li><code>.f</code> takes in the factor</li>
+<li><code>.x</code> takes in the numerical vector by which to order the levels</li>
+<li><code>.fun</code> optional function if there are multiple <code>.x</code> per <code>.f</code></li>
+<li><code>ggplot(relig_summary, aes(x = tvhours, y = fct_reorder(relig, tvhours))) + geom_point()</code></li>
+<li>Eventually, move out of <code>aes</code> and into a separate <code>mutate</code> call</li>
+</ul></li>
+<li>Use <code>fct_relevel(.f, ...)</code> bring certain levels to the front</li>
+<li>Use <code>fct_reorder2</code> reorders the factor <code>.f</code> by the <code>.y</code> values associated with the largest <code>.x</code> values</li>
+<li>Use <code>fct_infreq</code> in conjunction with <code>fct_rev</code> to order levels in increasing frequency (bar plots?)</li>
+</ul>
+<hr>
+<ul>
+<li><p><code>fct_recode</code> changes the value of each level</p></li>
+<li><p><code>fct_collapse</code> to group many different factors together</p></li>
+<li><p><code>fct_lump_*</code> family of functions to squish factors into a desired length</p></li>
+<li><p><code>ordered</code> to create an order for factors</p></li>
+</ul>
+</section>
+<section id="dates-and-times" class="level2">
+<h2 class="anchored" data-anchor-id="dates-and-times">17: Dates and Times</h2>
 </section>
 
 </main>

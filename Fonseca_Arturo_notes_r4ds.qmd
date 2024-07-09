@@ -237,3 +237,60 @@ Two important types of joins: mutating joins and filtering joins
 -   **Overlap joins**: special type of inequality join designed to work with ranges
 
     -   Three helpers: `between`, `within`, and `overlaps`
+
+### Class notes
+
+Using the `Lahman` package
+
+```{r}
+library(Lahman)
+library(tidyverse)
+pitcher_salary <- Pitching |>
+  left_join(Salaries)
+```
+
+`fill` to fill data
+
+## 16: Factors
+
+-   Used for categorical variables
+-   First, create a list of valid **levels** (order matters)
+    -   Values not present in `levels` will be `NA`
+    -   Access to levels directly using `levels()`
+    -   Use `col_factors()` to convert data when reading in
+-   To view levels of a factor variable, use `count(<var>)`
+-   Use `factor_reorder()` to reorganize your factors:
+    -   `.f` takes in the factor
+    -   `.x` takes in the numerical vector by which to order the levels
+    -   `.fun` optional function if there are multiple `.x` per `.f`
+    -   `ggplot(relig_summary, aes(x = tvhours, y = fct_reorder(relig, tvhours))) + geom_point()`
+    -   Eventually, move out of `aes` and into a separate `mutate` call
+-   Use `fct_relevel(.f, ...)` bring certain levels to the front
+-   Use `fct_reorder2` reorders the factor `.f` by the `.y` values associated with the largest `.x` values
+-   Use `fct_infreq` in conjunction with `fct_rev` to order levels in increasing frequency (bar plots?)
+
+------------------------------------------------------------------------
+
+-   `fct_recode` changes the value of each level
+
+-   `fct_collapse` to group many different factors together
+
+-   `fct_lump_*` family of functions to squish factors into a desired length
+
+-   `ordered` to create an order for factors
+
+## 17: Dates and Times
+
+-   `readr` automatically recognizes the **ISO8601** format
+
+-   Use `col_types` + `col_date`/`col_datetime` to convert column to a date/datetime format
+
+-   `lubridate`'s helpers `ymd` and friends to create from string
+
+    -   Force the creation of a datetime object by supplying a `tz`
+
+-   Use `make_date`/`make_datetime` to make a date/datetime from multiple columns
+
+-   `as_date` and `as_datetime` to convert to/from formats
+
+-   
