@@ -293,4 +293,61 @@ pitcher_salary <- Pitching |>
 
 -   `as_date` and `as_datetime` to convert to/from formats
 
--   
+------------------------------------------------------------------------
+
+You can pull out individual parts of the date with the accessor functions [`year()`](https://lubridate.tidyverse.org/reference/year.html), [`month()`](https://lubridate.tidyverse.org/reference/month.html), [`mday()`](https://lubridate.tidyverse.org/reference/day.html) (day of the month), [`yday()`](https://lubridate.tidyverse.org/reference/day.html) (day of the year), [`wday()`](https://lubridate.tidyverse.org/reference/day.html) (day of the week), [`hour()`](https://lubridate.tidyverse.org/reference/hour.html), [`minute()`](https://lubridate.tidyverse.org/reference/minute.html), and [`second()`](https://lubridate.tidyverse.org/reference/second.html). These are effectively the opposites of [`make_datetime()`](https://lubridate.tidyverse.org/reference/make_datetime.html).
+
+-   Set `label = TRUE` for abbreviated names of days of the week
+
+    -   `abbr = FALSE` for full weekday names
+
+------------------------------------------------------------------------
+
+Rounding data
+
+-   `floor_date()`, `round_date()`, `ceiling_date()`: `(<dates_vector>, <unit>)`
+
+------------------------------------------------------------------------
+
+Modifying data
+
+-   `<unit>(<date>) <- <value>` or `update(<date>, <unit> = <value>, ...)`
+
+------------------------------------------------------------------------
+
+Time spans
+
+-   Duration
+
+    -   Lubridate treats `difftime` objects as seconds
+
+    -   Might not be what you expect
+
+-   Period
+
+    -   More likely to be what you expect
+
+-   Interval
+
+    -   Create an interval by using `%--%`
+
+------------------------------------------------------------------------
+
+Time zones
+
+-   Lubridate always uses UTC
+
+### Class notes
+
+```
+auto_clean <- Auto |>
+  mutate(origin = factor(origin,
+                         levels = c(1, 2, 3),
+                         labels = "American", "European", "Japanese"))
+
+auto_clean <- auto_clean |>
+  mutate(origin = fct_relevel(origin))
+```
+
+`fct_collapse`: specify the name of each new level and which sub-levels belong to it period
+`fct_lump`: create a column "other" for few observation values

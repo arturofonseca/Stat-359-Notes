@@ -3090,7 +3090,10 @@ vertical-align: -.125em;
   <li><a href="#class-notes-1" id="toc-class-notes-1" class="nav-link" data-scroll-target="#class-notes-1">Class notes</a></li>
   </ul></li>
   <li><a href="#factors" id="toc-factors" class="nav-link" data-scroll-target="#factors">16: Factors</a></li>
-  <li><a href="#dates-and-times" id="toc-dates-and-times" class="nav-link" data-scroll-target="#dates-and-times">17: Dates and Times</a></li>
+  <li><a href="#dates-and-times" id="toc-dates-and-times" class="nav-link" data-scroll-target="#dates-and-times">17: Dates and Times</a>
+  <ul class="collapse">
+  <li><a href="#class-notes-2" id="toc-class-notes-2" class="nav-link" data-scroll-target="#class-notes-2">Class notes</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -3401,6 +3404,67 @@ vertical-align: -.125em;
 </section>
 <section id="dates-and-times" class="level2">
 <h2 class="anchored" data-anchor-id="dates-and-times">17: Dates and Times</h2>
+<ul>
+<li><p><code>readr</code> automatically recognizes the <strong>ISO8601</strong> format</p></li>
+<li><p>Use <code>col_types</code> + <code>col_date</code>/<code>col_datetime</code> to convert column to a date/datetime format</p></li>
+<li><p><code>lubridate</code>’s helpers <code>ymd</code> and friends to create from string</p>
+<ul>
+<li>Force the creation of a datetime object by supplying a <code>tz</code></li>
+</ul></li>
+<li><p>Use <code>make_date</code>/<code>make_datetime</code> to make a date/datetime from multiple columns</p></li>
+<li><p><code>as_date</code> and <code>as_datetime</code> to convert to/from formats</p></li>
+</ul>
+<hr>
+<p>You can pull out individual parts of the date with the accessor functions <a href="https://lubridate.tidyverse.org/reference/year.html"><code>year()</code></a>, <a href="https://lubridate.tidyverse.org/reference/month.html"><code>month()</code></a>, <a href="https://lubridate.tidyverse.org/reference/day.html"><code>mday()</code></a> (day of the month), <a href="https://lubridate.tidyverse.org/reference/day.html"><code>yday()</code></a> (day of the year), <a href="https://lubridate.tidyverse.org/reference/day.html"><code>wday()</code></a> (day of the week), <a href="https://lubridate.tidyverse.org/reference/hour.html"><code>hour()</code></a>, <a href="https://lubridate.tidyverse.org/reference/minute.html"><code>minute()</code></a>, and <a href="https://lubridate.tidyverse.org/reference/second.html"><code>second()</code></a>. These are effectively the opposites of <a href="https://lubridate.tidyverse.org/reference/make_datetime.html"><code>make_datetime()</code></a>.</p>
+<ul>
+<li><p>Set <code>label = TRUE</code> for abbreviated names of days of the week</p>
+<ul>
+<li><code>abbr = FALSE</code> for full weekday names</li>
+</ul></li>
+</ul>
+<hr>
+<p>Rounding data</p>
+<ul>
+<li><code>floor_date()</code>, <code>round_date()</code>, <code>ceiling_date()</code>: <code>(&lt;dates_vector&gt;, &lt;unit&gt;)</code></li>
+</ul>
+<hr>
+<p>Modifying data</p>
+<ul>
+<li><code>&lt;unit&gt;(&lt;date&gt;) &lt;- &lt;value&gt;</code> or <code>update(&lt;date&gt;, &lt;unit&gt; = &lt;value&gt;, ...)</code></li>
+</ul>
+<hr>
+<p>Time spans</p>
+<ul>
+<li><p>Duration</p>
+<ul>
+<li><p>Lubridate treats <code>difftime</code> objects as seconds</p></li>
+<li><p>Might not be what you expect</p></li>
+</ul></li>
+<li><p>Period</p>
+<ul>
+<li>More likely to be what you expect</li>
+</ul></li>
+<li><p>Interval</p>
+<ul>
+<li>Create an interval by using <code>%--%</code></li>
+</ul></li>
+</ul>
+<hr>
+<p>Time zones</p>
+<ul>
+<li>Lubridate always uses UTC</li>
+</ul>
+<section id="class-notes-2" class="level3">
+<h3 class="anchored" data-anchor-id="class-notes-2">Class notes</h3>
+<pre><code>auto_clean &lt;- Auto |&gt;
+  mutate(origin = factor(origin,
+                         levels = c(1, 2, 3),
+                         labels = &quot;American&quot;, &quot;European&quot;, &quot;Japanese&quot;))
+
+auto_clean &lt;- auto_clean |&gt;
+  mutate(origin = fct_relevel(origin))</code></pre>
+<p><code>fct_collapse</code>: specify the name of each new level and which sub-levels belong to it period <code>fct_lump</code>: create a column “other” for few observation values</p>
+</section>
 </section>
 
 </main>
