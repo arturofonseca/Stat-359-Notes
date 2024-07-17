@@ -3093,6 +3093,7 @@ vertical-align: -.125em;
   <li><a href="#dates-and-times" id="toc-dates-and-times" class="nav-link" data-scroll-target="#dates-and-times">17: Dates and Times</a>
   <ul class="collapse">
   <li><a href="#class-notes-2" id="toc-class-notes-2" class="nav-link" data-scroll-target="#class-notes-2">Class notes</a></li>
+  <li><a href="#introduction-to-modeling" id="toc-introduction-to-modeling" class="nav-link" data-scroll-target="#introduction-to-modeling">Introduction to Modeling</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -3464,6 +3465,42 @@ vertical-align: -.125em;
 auto_clean &lt;- auto_clean |&gt;
   mutate(origin = fct_relevel(origin))</code></pre>
 <p><code>fct_collapse</code>: specify the name of each new level and which sub-levels belong to it period <code>fct_lump</code>: create a column “other” for few observation values</p>
+</section>
+<section id="introduction-to-modeling" class="level3">
+<h3 class="anchored" data-anchor-id="introduction-to-modeling">Introduction to Modeling</h3>
+<p><strong>Types of models</strong></p>
+<ul>
+<li><p>Descriptive</p>
+<ul>
+<li>Describe characteristics of some data</li>
+</ul></li>
+<li><p>Inferential</p>
+<ul>
+<li>Produce a decision</li>
+</ul></li>
+<li><p>Predictive</p>
+<ul>
+<li>Produce accurate prediction</li>
+</ul></li>
+</ul>
+<p><strong>Parametric vs. Nonparametric</strong></p>
+<ul>
+<li><p>Parametric:</p>
+<ul>
+<li><p>Assumes <code>y</code> follows some known form/equation</p></li>
+<li><p>Estimate a set of parameters</p></li>
+</ul></li>
+<li><p>Nonparametric</p>
+<ul>
+<li><p>“Empirically-driven model”</p></li>
+<li><p>No assumptions about form of <code>f(x)</code></p></li>
+</ul></li>
+</ul>
+<p><strong>Supervised vs. Unsupervised learning</strong></p>
+<p><strong>Interpretability vs. Flexibility trade off</strong></p>
+<ul>
+<li>Bias decreases as flexibility increases</li>
+</ul>
 </section>
 </section>
 

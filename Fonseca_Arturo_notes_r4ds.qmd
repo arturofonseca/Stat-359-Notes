@@ -339,7 +339,7 @@ Time zones
 
 ### Class notes
 
-```
+```         
 auto_clean <- Auto |>
   mutate(origin = factor(origin,
                          levels = c(1, 2, 3),
@@ -349,5 +349,40 @@ auto_clean <- auto_clean |>
   mutate(origin = fct_relevel(origin))
 ```
 
-`fct_collapse`: specify the name of each new level and which sub-levels belong to it period
-`fct_lump`: create a column "other" for few observation values
+`fct_collapse`: specify the name of each new level and which sub-levels belong to it period `fct_lump`: create a column "other" for few observation values
+
+### Introduction to Modeling
+
+**Types of models**
+
+-   Descriptive
+
+    -   Describe characteristics of some data
+
+-   Inferential
+
+    -   Produce a decision
+
+-   Predictive
+
+    -   Produce accurate prediction
+
+**Parametric vs. Nonparametric**
+
+-   Parametric:
+
+    -   Assumes `y` follows some known form/equation
+
+    -   Estimate a set of parameters
+
+-   Nonparametric
+
+    -   "Empirically-driven model"
+
+    -   No assumptions about form of `f(x)`
+
+**Supervised vs. Unsupervised learning**
+
+**Interpretability vs. Flexibility trade off**
+
+-   Bias decreases as flexibility increases

@@ -1,0 +1,58 @@
+---
+title: "Tidy Modeling with R Notes"
+subtitle: "STAT 359"
+author: "Arturo Fonseca"
+
+format:
+  html:
+    toc: true
+    embed-resources: true
+    link-external-newwindow: true
+    
+execute:
+  warning: false
+
+from: markdown+emoji
+---
+
+## 1: Software for modeling
+
+## 2: A Tidyverse Primer
+
+## 3: A Review of R Modeling Fundamentals
+
+## 4: The Ames Housing Data
+
+-   Log transform your data using `log10()`
+
+-   Always perform exploratory data analysis, period
+
+## 5: Spending our Data
+
+-   "...we can think of as an available data budget."
+
+**Splitting data**
+
+-   Into the training set and test set
+
+-   `initial_split()` returning an `rsplit` object
+
+    -   To access each partition, use `training(<rsplit>)`,...
+
+-   Use stratified sampling to avoid having class imbalance
+
+    -   Use the `strata` argument within `initial_split` to stratify data
+
+-   Use `initial_time_split()` instead of `initial_split()` to split time series data, using the latest data as the test set
+
+**Validation set**
+
+-   Use `initial_validation_split()` to split data into training/validation/testing split
+
+**Multilevel data**
+
+-   Safe to assume that data from a property are independent of other properties
+
+**In general**
+
+-   Separate training set from test set
