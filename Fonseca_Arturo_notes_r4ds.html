@@ -3134,6 +3134,8 @@ window.Quarto = {
   <li><a href="#introduction-to-modeling" id="toc-introduction-to-modeling" class="nav-link" data-scroll-target="#introduction-to-modeling">Introduction to Modeling</a></li>
   <li><a href="#linear-regression-overview" id="toc-linear-regression-overview" class="nav-link" data-scroll-target="#linear-regression-overview">Linear Regression Overview</a></li>
   <li><a href="#fitting-models-with-tidymodels" id="toc-fitting-models-with-tidymodels" class="nav-link" data-scroll-target="#fitting-models-with-tidymodels">Fitting Models with Tidymodels</a></li>
+  <li><a href="#logistic-regression-overview" id="toc-logistic-regression-overview" class="nav-link" data-scroll-target="#logistic-regression-overview">Logistic Regression Overview</a></li>
+  <li><a href="#logistic-regression-code" id="toc-logistic-regression-code" class="nav-link" data-scroll-target="#logistic-regression-code">Logistic Regression Code</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -3567,7 +3569,107 @@ auto_clean &lt;- auto_clean |&gt;
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply transformation to data to reduce variance and impact of outliers</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>penguins_split <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">initial_split</span>(palmerpenguins<span class="sc">::</span>penguins, <span class="fl">0.8</span>, body_mass_g)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>penguins_split <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">initial_split</span>(palmerpenguins<span class="sc">::</span>penguins, <span class="fl">0.8</span>, body_mass_g)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>penguins_train <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">training</span>(penguins_split)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>penguins_test <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">testing</span>(penguins_split)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>lm_mod <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">&quot;lm&quot;</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>penguins_recipe <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(body_mass_g <span class="sc">~</span> flipper_length_mm <span class="sc">+</span> species,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>                          <span class="at">data =</span> penguins_train)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>lm_workflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(penguins_recipe) <span class="sc">|&gt;</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_mod)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>lm_fit <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">fit</span>(lm_workflow, penguins_train)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>lm_fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>══ Workflow [trained] ══════════════════════════════════════════════════════════
+Preprocessor: Recipe
+Model: linear_reg()
+
+── Preprocessor ────────────────────────────────────────────────────────────────
+0 Recipe Steps
+
+── Model ───────────────────────────────────────────────────────────────────────
+
+Call:
+stats::lm(formula = ..y ~ ., data = data)
+
+Coefficients:
+      (Intercept)  flipper_length_mm   speciesChinstrap      speciesGentoo  
+         -3809.94              39.63            -217.84             284.23  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>penguin_pred <span class="ot">&lt;-</span> penguins_test <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(<span class="fu">predict</span>(lm_fit, penguins_test))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>penguin_pred <span class="sc">|&gt;</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  yardstick<span class="sc">::</span><span class="fu">rmse</span>(body_mass_g, .pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard        345.</code></pre>
+</div>
+</div>
+</section>
+<section id="logistic-regression-overview" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression-overview">Logistic Regression Overview</h3>
+<ul>
+<li><p>Classification, mechanistic</p></li>
+<li><p>Result is a number (probability) between 0 and 1</p></li>
+<li><p>ROC AUC is the area under the curve (between 0 and 1)</p></li>
+<li><p>Accuracy is a number between 0 and 1</p></li>
+<li><p>Sensitivity: ability to designate an event as +</p></li>
+<li><p>Specificity: ability to designate observations as -</p></li>
+</ul>
+</section>
+<section id="logistic-regression-code" class="level3">
+<h3 class="anchored" data-anchor-id="logistic-regression-code">Logistic Regression Code</h3>
+<ul>
+<li>To handle severe class imbalance, you can downsample or upsample on the training dataset only</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>logistic_mod <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">logistic_reg</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">&quot;glm&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">&quot;classification&quot;</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>penguins_recipe <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(sex <span class="sc">~</span> ., <span class="at">data =</span> penguins_train)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>logistic_wrkflw <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(logistic_mod) <span class="sc">|&gt;</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(penguins_recipe)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>logistic_fit <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">fit</span>(logistic_wrkflw, penguins_train)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>logistic_fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>══ Workflow [trained] ══════════════════════════════════════════════════════════
+Preprocessor: Recipe
+Model: logistic_reg()
+
+── Preprocessor ────────────────────────────────────────────────────────────────
+0 Recipe Steps
+
+── Model ───────────────────────────────────────────────────────────────────────
+
+Call:  stats::glm(formula = ..y ~ ., family = stats::binomial, data = data)
+
+Coefficients:
+      (Intercept)   speciesChinstrap      speciesGentoo        islandDream  
+       268.204208          -6.512350          -7.329325           0.360584  
+  islandTorgersen     bill_length_mm      bill_depth_mm  flipper_length_mm  
+        -0.073789           0.531766           1.482475           0.023406  
+      body_mass_g               year  
+         0.005327          -0.169345  
+
+Degrees of Freedom: 265 Total (i.e. Null);  256 Residual
+  (7 observations deleted due to missingness)
+Null Deviance:      368.7 
+Residual Deviance: 112.2    AIC: 132.2</code></pre>
+</div>
 </div>
 </section>
 </section>
