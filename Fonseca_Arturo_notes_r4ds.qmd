@@ -386,3 +386,37 @@ auto_clean <- auto_clean |>
 **Interpretability vs. Flexibility trade off**
 
 -   Bias decreases as flexibility increases
+
+### Linear Regression Overview
+
+$\hat{y}=\hat{\beta_0}+\hat{\beta}_1x_1+\dots+\hat{\beta}_px_p$
+
+-   Regression, mechanistic, parametric, supervised
+
+-   $p$ predictors, each with a coefficient $\beta_i$
+
+    -   Least squares typically used to calculate residuals $J(\sum_i(y_i-\hat{y}_i)^2$
+
+-   Performance metric use RMSE instead $\sqrt{\frac{\sum_i(y_i-\hat{y}_i)^2}{n}}$
+
+-   Closed-form solution: $\beta=(X^TX)^{-1}X^Ty$ by setting gradient to 0
+
+### Fitting Models with Tidymodels
+
+- First step: training and test split
+
+    - Okay to use 20% for testing with large datasets
+    
+`palmerpenguins` package
+
+```{r}
+# Apply transformation to data to reduce variance and impact of outliers
+set.seed(1)
+penguins_split <- rsample::initial_split(palmerpenguins::penguins, 0.8, body_mass_g)
+penguins_train <- rsample::training(penguins_split)
+penguins_test <- rsample::testing(penguins_split)
+
+lmod <- linear_reg() |>
+  set_engine("lm")
+```
+
