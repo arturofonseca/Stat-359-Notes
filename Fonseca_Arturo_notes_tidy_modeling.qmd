@@ -56,3 +56,124 @@ from: markdown+emoji
 **In general**
 
 -   Separate training set from test set
+
+### Introduction to Modeling
+
+**Types of models**
+
+-   Descriptive
+
+    -   Describe characteristics of some data
+
+-   Inferential
+
+    -   Produce a decision
+
+-   Predictive
+
+    -   Produce accurate prediction
+
+**Parametric vs. Nonparametric**
+
+-   Parametric:
+
+    -   Assumes `y` follows some known form/equation
+
+    -   Estimate a set of parameters
+
+-   Nonparametric
+
+    -   "Empirically-driven model"
+
+    -   No assumptions about form of `f(x)`
+
+**Supervised vs. Unsupervised learning**
+
+**Interpretability vs. Flexibility trade off**
+
+-   Bias decreases as flexibility increases
+
+### Linear Regression Overview
+
+$\hat{y}=\hat{\beta_0}+\hat{\beta}_1x_1+\dots+\hat{\beta}_px_p$
+
+-   Regression, mechanistic, parametric, supervised
+
+-   $p$ predictors, each with a coefficient $\beta_i$
+
+    -   Least squares typically used to calculate residuals $J(\sum_i(y_i-\hat{y}_i)^2$
+
+-   Performance metric use RMSE instead $\sqrt{\frac{\sum_i(y_i-\hat{y}_i)^2}{n}}$
+
+-   Closed-form solution: $\beta=(X^TX)^{-1}X^Ty$ by setting gradient to 0
+
+### Fitting Models with Tidymodels
+
+-   First step: training and test split
+
+    -   Okay to use 20% for testing with large datasets
+
+`palmerpenguins` package
+
+```{r}
+library(tidyverse)
+
+# Apply transformation to data to reduce variance and impact of outliers
+set.seed(1)
+penguins_split <- rsample::initial_split(palmerpenguins::penguins, 0.8, body_mass_g)
+penguins_train <- rsample::training(penguins_split)
+penguins_test <- rsample::testing(penguins_split)
+
+lm_mod <- parsnip::linear_reg() %>%
+  parsnip::set_engine("lm")
+
+penguins_recipe <- recipes::recipe(body_mass_g ~ flipper_length_mm + species,
+                          data = penguins_train)
+
+lm_workflow <- workflows::workflow() |>
+  workflows::add_recipe(penguins_recipe) |>
+  workflows::add_model(lm_mod)
+
+lm_fit <- parsnip::fit(lm_workflow, penguins_train)
+lm_fit
+
+penguin_pred <- penguins_test |>
+  bind_cols(predict(lm_fit, penguins_test))
+
+penguin_pred |>
+  yardstick::rmse(body_mass_g, .pred)
+```
+
+### Logistic Regression Overview
+
+-   Classification, mechanistic
+
+-   Result is a number (probability) between 0 and 1
+
+-   ROC AUC is the area under the curve (between 0 and 1)
+
+-   Accuracy is a number between 0 and 1
+
+-   Sensitivity: ability to designate an event as +
+
+-   Specificity: ability to designate observations as -
+
+### Logistic Regression Code
+
+-   To handle severe class imbalance, you can downsample or upsample on the training dataset only
+
+```{r}
+logistic_mod <- parsnip::logistic_reg() |>
+  parsnip::set_engine("glm") |>
+  parsnip::set_mode("classification")
+
+penguins_recipe <- recipes::recipe(sex ~ ., data = penguins_train)
+
+logistic_wrkflw <- workflows::workflow() |>
+  workflows::add_model(logistic_mod) |>
+  workflows::add_recipe(penguins_recipe)
+
+logistic_fit <- parsnip::fit(logistic_wrkflw, penguins_train)
+
+logistic_fit
+```
