@@ -3126,6 +3126,12 @@ window.Quarto = {
   <li><a href="#logistic-regression-overview" id="toc-logistic-regression-overview" class="nav-link" data-scroll-target="#logistic-regression-overview">Logistic Regression Overview</a></li>
   <li><a href="#logistic-regression-code" id="toc-logistic-regression-code" class="nav-link" data-scroll-target="#logistic-regression-code">Logistic Regression Code</a></li>
   </ul></li>
+  <li><a href="#a-model-workflow" id="toc-a-model-workflow" class="nav-link" data-scroll-target="#a-model-workflow">7: A Model Workflow</a></li>
+  <li><a href="#feature-engineering-with-recipes" id="toc-feature-engineering-with-recipes" class="nav-link" data-scroll-target="#feature-engineering-with-recipes">8: Feature Engineering with recipes</a>
+  <ul class="collapse">
+  <li><a href="#random-forest-overview" id="toc-random-forest-overview" class="nav-link" data-scroll-target="#random-forest-overview">Random Forest Overview</a></li>
+  <li><a href="#workflows-and-recipes" id="toc-workflows-and-recipes" class="nav-link" data-scroll-target="#workflows-and-recipes">Workflows and Recipes</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -3367,6 +3373,215 @@ Degrees of Freedom: 265 Total (i.e. Null);  256 Residual
 Null Deviance:      368.7 
 Residual Deviance: 112.2    AIC: 132.2</code></pre>
 </div>
+</div>
+</section>
+</section>
+<section id="a-model-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="a-model-workflow">7: A Model Workflow</h2>
+<blockquote class="blockquote">
+<p>However, the model may need to be more focused on reducing false positive results (i.e., where true nonevents are classified as events). One way to do this is to raise the cutoff from 50% to some greater value</p>
+</blockquote>
+<div class="cell" data-exec="false">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>lm_model <span class="ot">&lt;-</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">&quot;lm&quot;</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A workflow always requires a parsnip model object</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>lm_wflow <span class="ot">&lt;-</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">workflow</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(lm_model)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Simple preprocessor</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>lm_wflow <span class="ot">&lt;-</span> </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  lm_wflow <span class="sc">%&gt;%</span> </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_formula</span>(Sale_Price <span class="sc">~</span> Longitude <span class="sc">+</span> Latitude)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>lm_wflow</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ══ Workflow ═════════════════════════════════════════════════════════════════════════</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Preprocessor: Formula</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Model: linear_reg()</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Sale_Price ~ Longitude + Latitude</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Linear Regression Model Specification (regression)</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computational engine: lm</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Workflows have a fit() method that can be used to create the </span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>lm_fit <span class="ot">&lt;-</span> <span class="fu">fit</span>(lm_wflow, ames_train)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co"># We can also predict() on the fitted workflow:</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(lm_fit, ames_test <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>))</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Both the model and preprocessor can be removed or updated:</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>lm_fit <span class="sc">%&gt;%</span> <span class="fu">update_formula</span>(Sale_Price <span class="sc">~</span> Longitude)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="co"># (Will remove old model)</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the add_variables() function</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>lm_wflow <span class="ot">&lt;-</span> </span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  lm_wflow <span class="sc">%&gt;%</span> </span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">remove_formula</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_variables</span>(<span class="at">outcome =</span> Sale_Price, <span class="at">predictors =</span> <span class="fu">c</span>(Longitude, Latitude))</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Could also do</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">ends_with</span>(<span class="st">&quot;tude&quot;</span>))</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">everything</span>() <span class="co"># will exclude outcome columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<blockquote class="blockquote">
+<p>Since the preprocessing is model dependent, <strong>workflows</strong> attempts to emulate what the underlying model would do whenever possible</p>
+</blockquote>
+<p>Can use <code>library(lme4) \ lmer(distance ~ Sex + (age | Subject), data = Orthodont)</code></p>
+</section>
+<section id="feature-engineering-with-recipes" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering-with-recipes">8: Feature Engineering with recipes</h2>
+<blockquote class="blockquote">
+<p>Other examples of preprocessing to build better features for modeling include:</p>
+<ul>
+<li><p>Correlation between predictors can be reduced via feature extraction or the removal of some predictors.</p></li>
+<li><p>When some predictors have missing values, they can be imputed using a sub-model.</p></li>
+<li><p>Models that use variance-type measures may benefit from coercing the distribution of some skewed predictors to be symmetric by estimating a transformation.</p></li>
+</ul>
+</blockquote>
+<blockquote class="blockquote">
+<p>A recipe is also an object that defines a series of steps for data processing. Unlike the formula method inside a modeling function, the recipe defines the steps via <code>step_*()</code> functions without immediately executing them; it is only a specification of what should be done</p>
+</blockquote>
+<div class="cell" data-exec="false">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lm_wflow <span class="ot">&lt;-</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  lm_wflow <span class="sc">%&gt;%</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">remove_variables</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(simple_ames)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>lm_wflow</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ══ Workflow ═════════════════════════════════════════════════════════════════════════</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Preprocessor: Recipe</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Model: linear_reg()</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Recipe Steps</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_log()</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_dummy()</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Linear Regression Model Specification (regression)</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Computational engine: lm</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co"># To tidy the model fit: </span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>lm_fit <span class="sc">%&gt;%</span> </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This returns the parsnip object:</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_parsnip</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Now tidy the linear model object:</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5 × 5</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   term                       estimate std.error statistic   p.value</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;                         &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 (Intercept)                -0.669    0.231        -2.90 3.80e-  3</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Gr_Liv_Area                 0.620    0.0143       43.2  2.63e-299</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 Year_Built                  0.00200  0.000117     17.1  6.16e- 62</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 Neighborhood_College_Creek  0.0178   0.00819       2.17 3.02e-  2</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 Neighborhood_Old_Town      -0.0330   0.00838      -3.93 8.66e-  5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<blockquote class="blockquote">
+<p>First, when calling <code>recipe(..., data)</code>, the data set is used to determine the data types of each column so that selectors such as <code>all_numeric()</code> or <code>all_numeric_predictors()</code> can be used.</p>
+<p>Second, when preparing the data using <code>fit(workflow, data)</code>, the training data are used for all estimation operations including a recipe that may be part of the <code>workflow</code>, from determining factor levels to computing PCA components and everything in between.</p>
+<p>Finally, when using <code>predict(workflow, new_data)</code>, no model or preprocessor parameters like those from recipes are re-estimated using the values in <code>new_data</code>. Take centering and scaling using <code>step_normalize()</code> as an example. Using this step, the means and standard deviations from the appropriate columns are determined from the training set; new samples at prediction time are standardized using these values from training when <code>predict()</code> is invoked.</p>
+</blockquote>
+<p>How are interactions specified in a recipe? A base R formula would take an interaction using a <code>:</code>, so we would use:</p>
+<pre><code>Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) + Bldg_Type + 
+  log10(Gr_Liv_Area):Bldg_Type
+# or
+Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) * Bldg_Type</code></pre>
+<p>The additional step would look like <code>step_interact(~ interaction terms)</code> where the terms on the right-hand side of the tilde are the interactions. These can include selectors, so it would be appropriate to use:</p>
+<pre><code>simple_ames &lt;- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type,
+         data = ames_train) %&gt;%
+  step_log(Gr_Liv_Area, base = 10) %&gt;% 
+  step_other(Neighborhood, threshold = 0.01) %&gt;% 
+  step_dummy(all_nominal_predictors()) %&gt;% 
+  # Gr_Liv_Area is on the log scale from a previous step
+  step_interact( ~ Gr_Liv_Area:starts_with(&quot;Bldg_Type_&quot;) )</code></pre>
+<p>In <strong>recipes</strong>, multiple steps can create these types of terms. To add a natural spline representation for this predictor:</p>
+<pre><code>recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + Latitude,
+         data = ames_train) %&gt;%
+  step_log(Gr_Liv_Area, base = 10) %&gt;% 
+  step_other(Neighborhood, threshold = 0.01) %&gt;% 
+  step_dummy(all_nominal_predictors()) %&gt;% 
+  step_interact( ~ Gr_Liv_Area:starts_with(&quot;Bldg_Type_&quot;) ) %&gt;% 
+  step_ns(Latitude, deg_free = 20)</code></pre>
+<p>…a recipe step for PCA might look like:</p>
+<pre><code>  # Use a regular expression to capture house size predictors: 
+  step_pca(matches(&quot;(SF$)|(Gr_Liv)&quot;))</code></pre>
+<p>Note that all of these columns are measured in square feet. PCA assumes that all of the predictors are on the same scale. That’s true in this case, but often this step can be preceded by <code>step_normalize()</code>, which will center and scale each column.</p>
+<p>Other step functions are row-based as well: <code>step_filter()</code>, <code>step_sample()</code>, <code>step_slice()</code>, and <code>step_arrange()</code>. In almost all uses of these steps, the <code>skip</code> argument should be set to <code>TRUE</code> (where <code>skip</code> refers to only applying these transformations to the training set).</p>
+<hr>
+<p>To solve this, the <code>add_role()</code>, <code>remove_role()</code>, and <code>update_role()</code> functions can be helpful. For example, for the house price data, the role of the street address column could be modified using:</p>
+<pre><code>ames_rec %&gt;% update_role(address, new_role = &quot;street address&quot;)</code></pre>
+<p>After this change, the <code>address</code> column in the dataframe will no longer be a predictor but instead will be a <code>&quot;street address&quot;</code> according to the recipe.</p>
+<section id="random-forest-overview" class="level3">
+<h3 class="anchored" data-anchor-id="random-forest-overview">Random Forest Overview</h3>
+<ul>
+<li><p>Non-parametric, classification or regression, versatile and simple</p></li>
+<li><p>Tuning parameters</p>
+<ul>
+<li>mtry: num of predictors to consider (<span class="math inline">\(\sqrt{|\text{predictors}|}\)</span>)</li>
+<li>num of trees</li>
+<li><span class="math inline">\(\min n\)</span></li>
+</ul></li>
+<li><p>Decision tree method:</p>
+<ul>
+<li>Stratifying/segmenting the predictor space into simple regions</li>
+<li>Predictors use mean/mode response</li>
+</ul></li>
+</ul>
+</section>
+<section id="workflows-and-recipes" class="level3">
+<h3 class="anchored" data-anchor-id="workflows-and-recipes">Workflows and Recipes</h3>
+<ul>
+<li><p>Explore your outcome variable</p></li>
+<li><p>Split the data</p></li>
+<li><p>Pre-process and explore a subset of the training data</p></li>
+<li><p>Make the recipe - define your formula and add feature engineering steps</p></li>
+<li><p>Define your model speculations - set your engine and mode</p></li>
+<li><p>Set the workflow</p></li>
+<li><p>Fit your model</p></li>
+<li><p>Evaluate your model</p></li>
+</ul>
+<p>Feature Engineering:</p>
+<ul>
+<li>Manipulation of your data set to improve model training</li>
+</ul>
+<p>Recipe:</p>
+<ul>
+<li><p>Prepares your data for modeling</p></li>
+<li><p>Pipeable sequences of feature engineering steps</p></li>
+<li><p>Missingness:</p>
+<ul>
+<li><code>step_impute_*()</code> (<code>knn</code>, <code>linear</code>, <code>mean</code>, <code>median</code>, <code>mode</code>, …)</li>
+<li>If &lt;20% of a variable is missing, go ahead and impute it</li>
+</ul></li>
+<li><p>Transformations:</p>
+<ul>
+<li><code>step_*()</code> (<code>normalize</code>, …)</li>
+</ul></li>
+<li><p>Dummy</p>
+<ul>
+<li>Set character/factor variables as dummy variables</li>
+</ul></li>
+<li><p>Remove unimportant variables</p>
+<ul>
+<li><code>step_rm()</code> (MAKE SURE TO REMOVE BEFORE MAKING NEW DUMMY COLUMNS)</li>
+</ul></li>
+<li><p>Other</p>
+<ul>
+<li><code>set_nzv()</code>, <code>step_date()</code></li>
+</ul></li>
+</ul>
+<p>Model and workflow</p>
+<ul>
+<li><p>Define model</p></li>
+<li><p>Workflow objects can bind a model and a preprocessor</p></li>
+</ul>
+<p>Predict and evaluate</p>
+<ul>
+<li>Using a <code>metric_set()</code></li>
+</ul>
+<div class="cell" data-exec="false">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>penguins_train <span class="ot">&lt;-</span> <span class="fu">recipe</span>(body_mass_g <span class="sc">~</span> ., <span class="at">data =</span> penguin_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
