@@ -3132,6 +3132,11 @@ window.Quarto = {
   <li><a href="#random-forest-overview" id="toc-random-forest-overview" class="nav-link" data-scroll-target="#random-forest-overview">Random Forest Overview</a></li>
   <li><a href="#workflows-and-recipes" id="toc-workflows-and-recipes" class="nav-link" data-scroll-target="#workflows-and-recipes">Workflows and Recipes</a></li>
   </ul></li>
+  <li><a href="#resampling-for-evaluating-performance" id="toc-resampling-for-evaluating-performance" class="nav-link" data-scroll-target="#resampling-for-evaluating-performance">10: Resampling for Evaluating Performance</a></li>
+  <li><a href="#comparing-models-with-resampling" id="toc-comparing-models-with-resampling" class="nav-link" data-scroll-target="#comparing-models-with-resampling">11: Comparing Models with Resampling</a>
+  <ul class="collapse">
+  <li><a href="#resampling-and-knn-overview" id="toc-resampling-and-knn-overview" class="nav-link" data-scroll-target="#resampling-and-knn-overview">Resampling and KNN Overview</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -3583,6 +3588,144 @@ Sale_Price ~ Neighborhood + log10(Gr_Liv_Area) * Bldg_Type</code></pre>
 <div class="cell" data-exec="false">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>penguins_train <span class="ot">&lt;-</span> <span class="fu">recipe</span>(body_mass_g <span class="sc">~</span> ., <span class="at">data =</span> penguin_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+</section>
+<section id="resampling-for-evaluating-performance" class="level2">
+<h2 class="anchored" data-anchor-id="resampling-for-evaluating-performance">10: Resampling for Evaluating Performance</h2>
+<p><strong>10.1: The Resubstitution Approach</strong></p>
+<p>Both RMSE and R2R2 are computed. The resubstitution statistics are:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">estimate_perf</span>(rf_fit, ames_train)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 4</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   .metric .estimate object data </span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 rmse       0.0365 rf_fit train</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 rsq        0.960  rf_fit train</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">estimate_perf</span>(lm_fit, ames_train)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 2 × 4</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   .metric .estimate object data </span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 rmse       0.0754 lm_fit train</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 rsq        0.816  lm_fit train</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In this context, <em>bias</em> is the difference between the true pattern or relationships in data and the types of patterns that the model can emulate. Many black-box machine learning models have low bias, meaning they can reproduce complex relationships. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and are considered <em>high bias</em> models</p>
+</div>
+</div>
+<p><strong>10.2 Resampling Methods</strong></p>
+<blockquote class="blockquote">
+<p>A bootstrap sample of the training set is a sample that is the same size as the training set but is drawn <em>with replacement</em>.</p>
+</blockquote>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For some resampling methods, such as the bootstrap or repeated cross-validation, there will be multiple predictions per row of the original training set. To obtain summarized values (averages of the replicate predictions) use collect_predictions(object, summarize = TRUE).</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(ames)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ames <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ames, <span class="at">Sale_Price =</span> <span class="fu">log10</span>(Sale_Price))</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">502</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>ames_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(ames, <span class="at">prop =</span> <span class="fl">0.80</span>, <span class="at">strata =</span> Sale_Price)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>ames_train <span class="ot">&lt;-</span> <span class="fu">training</span>(ames_split)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>ames_test  <span class="ot">&lt;-</span>  <span class="fu">testing</span>(ames_split)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>ames_rec <span class="ot">&lt;-</span> </span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">recipe</span>(Sale_Price <span class="sc">~</span> Neighborhood <span class="sc">+</span> Gr_Liv_Area <span class="sc">+</span> Year_Built <span class="sc">+</span> Bldg_Type <span class="sc">+</span> </span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>           Latitude <span class="sc">+</span> Longitude, <span class="at">data =</span> ames_train) <span class="sc">%&gt;%</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_log</span>(Gr_Liv_Area, <span class="at">base =</span> <span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_other</span>(Neighborhood, <span class="at">threshold =</span> <span class="fl">0.01</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_interact</span>( <span class="sc">~</span> Gr_Liv_Area<span class="sc">:</span><span class="fu">starts_with</span>(<span class="st">&quot;Bldg_Type_&quot;</span>) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_ns</span>(Latitude, Longitude, <span class="at">deg_free =</span> <span class="dv">20</span>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>lm_model <span class="ot">&lt;-</span> <span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span> <span class="fu">set_engine</span>(<span class="st">&quot;lm&quot;</span>)</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>lm_wflow <span class="ot">&lt;-</span> </span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">workflow</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(lm_model) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(ames_rec)</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>lm_fit <span class="ot">&lt;-</span> <span class="fu">fit</span>(lm_wflow, ames_train)</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>rf_model <span class="ot">&lt;-</span> </span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rand_forest</span>(<span class="at">trees =</span> <span class="dv">1000</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">&quot;ranger&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">&quot;regression&quot;</span>)</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>rf_wflow <span class="ot">&lt;-</span> </span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">workflow</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_formula</span>(</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>    Sale_Price <span class="sc">~</span> Neighborhood <span class="sc">+</span> Gr_Liv_Area <span class="sc">+</span> Year_Built <span class="sc">+</span> Bldg_Type <span class="sc">+</span> </span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>      Latitude <span class="sc">+</span> Longitude) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(rf_model) </span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1001</span>)</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>ames_folds <span class="ot">&lt;-</span> <span class="fu">vfold_cv</span>(ames_train, <span class="at">v =</span> <span class="dv">10</span>)</span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>keep_pred <span class="ot">&lt;-</span> <span class="fu">control_resamples</span>(<span class="at">save_pred =</span> <span class="cn">TRUE</span>, <span class="at">save_workflow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1003</span>)</span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>rf_res <span class="ot">&lt;-</span> rf_wflow <span class="sc">%&gt;%</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> ames_folds, <span class="at">control =</span> keep_pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="comparing-models-with-resampling" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-models-with-resampling">11: Comparing Models with Resampling</h2>
+<section id="resampling-and-knn-overview" class="level3">
+<h3 class="anchored" data-anchor-id="resampling-and-knn-overview">Resampling and KNN Overview</h3>
+<p><strong>KNN</strong></p>
+<ul>
+<li>Regression or classification</li>
+<li>Data-driven</li>
+<li>Tuning parameter: <span class="math inline">\(k\)</span> neighbors</li>
+<li>“Nearest” dependent on distance metric: <span class="math inline">\(\text{distance}=\sqrt{\sum_{j=1}^m (y_j-x_j)^2}\)</span></li>
+</ul>
+<p>Bias-variance trade-off</p>
+<p><img src="images/Screenshot%202024-08-05%20at%202.23.19%20PM.png" class="img-fluid"></p>
+<p><strong>Resampling</strong></p>
+<ul>
+<li>The selection of randomized cases from the original data sample with replacement in order to estimate the population parameter multiple times</li>
+</ul>
+<p><strong>Types of resampling</strong></p>
+<ul>
+<li><p><strong>V-fold cross-validation</strong></p>
+<ul>
+<li><p>Partition data into V sets of roughly equal size</p></li>
+<li><p>V sets of performance metrics</p></li>
+</ul></li>
+<li><p><strong>Leave-one-out cross validation</strong></p></li>
+<li><p><strong>Monte Carlo cross-validation</strong></p>
+<ul>
+<li>Data sets are not mutually exclusive</li>
+</ul></li>
+</ul>
+<p><strong>Where does this fit?</strong></p>
+<ol type="1">
+<li>Split data</li>
+<li>EDA and feature engineering</li>
+<li>Fold the training data</li>
+<li>Define the recipes</li>
+<li>Set your engines and create workflows</li>
+<li>Fit model(s) to the folded data</li>
+</ol>
 </section>
 </section>
 

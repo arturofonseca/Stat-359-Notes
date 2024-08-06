@@ -421,3 +421,131 @@ Predict and evaluate
 #| exec: false
 penguins_train <- recipe(body_mass_g ~ ., data = penguin_train)
 ```
+
+## 10: Resampling for Evaluating Performance
+
+**10.1: The Resubstitution Approach**
+
+Both RMSE and R2R2 are computed. The resubstitution statistics are:
+
+```{r}
+#| eval: false
+
+estimate_perf(rf_fit, ames_train)
+#> # A tibble: 2 × 4
+#>   .metric .estimate object data 
+#>   <chr>       <dbl> <chr>  <chr>
+#> 1 rmse       0.0365 rf_fit train
+#> 2 rsq        0.960  rf_fit train
+estimate_perf(lm_fit, ames_train)
+#> # A tibble: 2 × 4
+#>   .metric .estimate object data 
+#>   <chr>       <dbl> <chr>  <chr>
+#> 1 rmse       0.0754 lm_fit train
+#> 2 rsq        0.816  lm_fit train
+```
+
+::: callout-note
+In this context, *bias* is the difference between the true pattern or relationships in data and the types of patterns that the model can emulate. Many black-box machine learning models have low bias, meaning they can reproduce complex relationships. Other models (such as linear/logistic regression, discriminant analysis, and others) are not as adaptable and are considered *high bias* models
+:::
+
+**10.2 Resampling Methods**
+
+> A bootstrap sample of the training set is a sample that is the same size as the training set but is drawn *with replacement*.
+
+::: callout-note
+For some resampling methods, such as the bootstrap or repeated cross-validation, there will be multiple predictions per row of the original training set. To obtain summarized values (averages of the replicate predictions) use collect_predictions(object, summarize = TRUE).
+:::
+
+```{r}
+#| eval: false
+
+library(tidymodels)
+data(ames)
+ames <- mutate(ames, Sale_Price = log10(Sale_Price))
+
+set.seed(502)
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+
+ames_rec <- 
+  recipe(Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+           Latitude + Longitude, data = ames_train) %>%
+  step_log(Gr_Liv_Area, base = 10) %>% 
+  step_other(Neighborhood, threshold = 0.01) %>% 
+  step_dummy(all_nominal_predictors()) %>% 
+  step_interact( ~ Gr_Liv_Area:starts_with("Bldg_Type_") ) %>% 
+  step_ns(Latitude, Longitude, deg_free = 20)
+
+lm_model <- linear_reg() %>% set_engine("lm")
+
+lm_wflow <- 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(ames_rec)
+
+lm_fit <- fit(lm_wflow, ames_train)
+
+rf_model <- 
+  rand_forest(trees = 1000) %>% 
+  set_engine("ranger") %>% 
+  set_mode("regression")
+
+rf_wflow <- 
+  workflow() %>% 
+  add_formula(
+    Sale_Price ~ Neighborhood + Gr_Liv_Area + Year_Built + Bldg_Type + 
+      Latitude + Longitude) %>% 
+  add_model(rf_model) 
+
+set.seed(1001)
+ames_folds <- vfold_cv(ames_train, v = 10)
+
+keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+
+set.seed(1003)
+rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred)
+```
+
+## 11: Comparing Models with Resampling
+
+### Resampling and KNN Overview
+
+**KNN**
+
+-   Regression or classification
+-   Data-driven
+-   Tuning parameter: $k$ neighbors
+-   "Nearest" dependent on distance metric: $\text{distance}=\sqrt{\sum_{j=1}^m (y_j-x_j)^2}$
+
+Bias-variance trade-off
+
+![](images/Screenshot%202024-08-05%20at%202.23.19%20PM.png)
+
+**Resampling**
+
+-   The selection of randomized cases from the original data sample with replacement in order to estimate the population parameter multiple times
+
+**Types of resampling**
+
+-   **V-fold cross-validation**
+
+    -   Partition data into V sets of roughly equal size
+
+    -   V sets of performance metrics
+
+-   **Leave-one-out cross validation**
+
+-   **Monte Carlo cross-validation**
+
+    -   Data sets are not mutually exclusive
+
+**Where does this fit?**
+
+1.  Split data
+2.  EDA and feature engineering
+3.  Fold the training data
+4.  Define the recipes
+5.  Set your engines and create workflows
+6.  Fit model(s) to the folded data
