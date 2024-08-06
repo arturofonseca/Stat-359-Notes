@@ -11,6 +11,7 @@ format:
     
 execute:
   warning: false
+  eval: false
 
 from: markdown+emoji
 ---
@@ -509,6 +510,18 @@ rf_res <- rf_wflow %>% fit_resamples(resamples = ames_folds, control = keep_pred
 ```
 
 ## 11: Comparing Models with Resampling
+
+```{r}
+#| eval: false
+
+lm_models <- 
+  lm_models %>% 
+  workflow_map("fit_resamples", 
+               # Options to `workflow_map()`: 
+               seed = 1101, verbose = TRUE,
+               # Options to `fit_resamples()`: 
+               resamples = ames_folds, control = keep_pred)
+```
 
 ### Resampling and KNN Overview
 
